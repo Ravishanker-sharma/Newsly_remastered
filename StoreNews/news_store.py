@@ -1,6 +1,4 @@
-from langchain_google_genai import ChatGoogleGenerativeAI
-from dotenv import load_dotenv
-import os
+from config import llm
 from fetch_news_all_kind import fetch_raw_data
 import json , re
 import threading
@@ -8,16 +6,9 @@ import time
 from Database.Sqlbase import update_news_data
 from Database.vectordatabase import add_data
 
-load_dotenv()
-apikey = os.getenv("GEMINI_API_KEY")
 page = 1  # Will try to implement later
 final_data = []
 lock = threading.Lock()
-llm = ChatGoogleGenerativeAI(
-    model="gemini-2.0-flash",
-    api_key = apikey,
-    temperature=1.5
-)
 
 # Distinguished Raw News Data
 whole_data = fetch_raw_data()

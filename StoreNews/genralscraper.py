@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from yahoosearchengine import yahoo_search
+from .yahoosearchengine import yahoo_search
 from langchain.agents import tool
 import re
 
@@ -21,7 +21,7 @@ def contains_binary_or_corrupt(text: str) -> bool:
 
     return False
 
-def smart_scrape(url,type=None):
+def smart_scrape(url,type=None  ):
         print(f"⚠⚠ Running for Url[{url}] || Type : {type} ⚠⚠")
         info = dict()
         temp_lis_h = []
@@ -76,7 +76,7 @@ def get_data(querry:str):
     """
     This function Provides Data Using web search and scraping.
     :param querry: String to be searched on web.
-    :return: String of data
+    :return: list of dictionaries
     """
     print("Tool used for query : ",querry)
     global data
