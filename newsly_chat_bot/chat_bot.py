@@ -6,7 +6,7 @@ from Database.vectordatabase import query_base
 from langchain.agents import Tool
 from langgraph.checkpoint.memory import MemorySaver
 from config import llm
-from IPython.display import display, Image
+
 
 memory = MemorySaver()
 
@@ -43,18 +43,28 @@ graph.add_edge("tools", "bot")
 
 app = graph.compile(checkpointer=memory)
 
-display(Image(app.get_graph().draw_mermaid_png()))
+
 
 intialized_threads = set()
 
 def news_chat(message,thread_id):
     if thread_id not in intialized_threads:
-        msg = {"messages": [{"role":"system","content":"You are a Chatbot developed by CODEX"},{"role": "user", "content": message}]}
+        prompt = '''
+        You are a helpful News assistant chatbot, who provides unbiased and accurate news to the user.
+        Format of news:
+            Headline
+                Bullet point 1
+                Bullet point 2
+                Bullet point 3
+                Bullet point 4
+                Bullet point N
+        Provide clear News do not add your own perspective in the news.
+        Be very very Polite.
+        '''
+        msg = {"messages": [{"role":"system","content":prompt},{"role": "user", "content": message}]}
     else:
         msg = {"messages": [{"role": "user", "content": message}]}
     config1 = {"configurable": {"thread_id": thread_id}}
     output = app.invoke(msg, config=config1)
-    print("user:",message)
-    print("bot",output['messages'][-1].content)
-    print(output)
+    return output['messages'][-1].content
 
