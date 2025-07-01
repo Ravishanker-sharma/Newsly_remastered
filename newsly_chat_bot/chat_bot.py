@@ -28,6 +28,8 @@ tools = [
 
 llm_with_tools = llm.bind_tools(tools)
 
+
+
 def chat_bot(state: Agent_state):
     return {"messages": [llm_with_tools.invoke(state["messages"])]}
 
@@ -43,11 +45,16 @@ app = graph.compile(checkpointer=memory)
 
 display(Image(app.get_graph().draw_mermaid_png()))
 
+intialized_threads = set()
+
 def news_chat(message,thread_id):
+    if thread_id not in intialized_threads:
+        msg = {"messages": [{"role":"system","content":"You are a Chatbot developed by CODEX"},{"role": "user", "content": message}]}
+    else:
+        msg = {"messages": [{"role": "user", "content": message}]}
     config1 = {"configurable": {"thread_id": thread_id}}
-    output = app.invoke({"messages": [{"role": "user", "content": message}]}, config=config1)
+    output = app.invoke(msg, config=config1)
     print("user:",message)
     print("bot",output['messages'][-1].content)
+    print(output)
 
-news_chat("my fav is red","1")
-news_chat("what is my fav","1")
