@@ -1,10 +1,12 @@
 import requests
 from bs4 import BeautifulSoup
-from .yahoosearchengine import yahoo_search
+from StoreNews.yahoosearchengine import yahoo_search
 from langchain.agents import tool
 import re
+import threading
 
 data = []
+lock = threading.Lock()
 
 def contains_binary_or_corrupt(text: str) -> bool:
     # Detects replacement characters (�)
@@ -81,12 +83,25 @@ def get_data(querry:str):
     print("Tool used for query : ",querry)
     global data
     data = []
+    threads = []
+
+    def run_scrape(url):
+        out = smart_scrape(url)
+        with lock:
+            data.append(out)
+
     urls = yahoo_search(querry)
     for url in urls:
         try:
-            data.append(smart_scrape(url))
+            t = threading.Thread(target=run_scrape,args=(url,))
+            threads.append(t)
         except Exception as e:
             print("Error from the get_data tool:- ",e)
+
+    for t in threads:
+        t.start()
+    for t in threads:
+        t.join()
     return data
 
 if __name__ == '__main__':
