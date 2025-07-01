@@ -1,5 +1,5 @@
 from config import llm
-from fetch_news_all_kind import fetch_raw_data
+from StoreNews.fetch_news_all_kind import fetch_raw_data
 import json , re
 import threading
 import time

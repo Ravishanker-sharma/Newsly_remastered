@@ -1,5 +1,5 @@
-from hindustandscaper import scrape_ht_world_news_page
-from genralscraper import smart_scrape
+from StoreNews.hindustandscaper import scrape_ht_world_news_page
+from StoreNews.genralscraper import smart_scrape
 import threading
 
 world_url = "https://www.hindustantimes.com/world-news/page-"
