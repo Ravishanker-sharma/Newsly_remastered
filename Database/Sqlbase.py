@@ -85,3 +85,23 @@ def update_user_preference(preference,user_id):
     UPDATE user_data SET preferences = %s WHERE user_id = %s
     ''',(preference,user_id))
     conn.commit()
+
+
+
+def get_news(page_number):
+        limit = 50
+        offset = (page_number - 1) * limit
+
+        query = """
+                SELECT id, headline, points, type,image_url,source_url,created_at
+                FROM newsdata
+                ORDER BY created_at DESC
+                    LIMIT %s \
+                OFFSET %s \
+                """
+        cursor.execute(query, (limit, offset))
+        rows = cursor.fetchall()
+
+        cursor.close()
+        conn.close()
+        return rows

@@ -67,4 +67,3 @@ def news_chat(message,thread_id):
     config1 = {"configurable": {"thread_id": thread_id}}
     output = app.invoke(msg, config=config1)
     return output['messages'][-1].content
-
