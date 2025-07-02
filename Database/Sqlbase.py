@@ -117,9 +117,6 @@ def get_news(page_number):
                 """
         cursor.execute(query, (limit, offset))
         rows = cursor.fetchall()
-
-        cursor.close()
-        conn.close()
         return rows
 
 def latest_news_id():
@@ -132,9 +129,14 @@ def latest_news_id():
     cursor.execute(query)
     latest_id = cursor.fetchone()
     cursor.close()
-    conn.close()
     return latest_id
 
+def get_user_preference(user_id):
+    query = '''
+    SELECT preferences , likes , dislikes FROM user_data WHERE user_id = %s
+    '''
+    cursor.execute(query,user_id)
+    prefer = cursor.fetchone()
+    return prefer
 
-out = get_news(1)
-print(type(out[1]))
+
