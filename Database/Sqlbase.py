@@ -105,3 +105,4 @@ def get_news(page_number):
         cursor.close()
         conn.close()
         return rows
+
