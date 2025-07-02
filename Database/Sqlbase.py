@@ -47,7 +47,6 @@ if check_table_existence('user_data') == False:
     age INT,
     user_id TEXT,
     email TEXT UNIQUE NOT NULL,
-    preferences TEXT,
     likes TEXT,
     dislikes TEXT
     
@@ -75,8 +74,8 @@ def update_news_data():
 def update_user_data(user):
     try:
         cursor.execute(
-            '''INSERT INTO user_data (name,age,user_id,email,preferences) VALUES (%s,%s,%s,%s,%s)''',
-            (user['name'],user['age'],str(uuid.uuid4()),user['email'],None)
+            '''INSERT INTO user_data (name,age,user_id,email) VALUES (%s,%s,%s,%s)''',
+            (user['name'],user['age'],str(uuid.uuid4()),user['email'])
         )
         conn.commit()
         print("User Added!")
@@ -133,7 +132,7 @@ def latest_news_id():
 
 def get_user_preference(user_id):
     query = '''
-    SELECT preferences , likes , dislikes FROM user_data WHERE user_id = %s
+    SELECT  likes , dislikes FROM user_data WHERE user_id = %s
     '''
     cursor.execute(query,user_id)
     prefer = cursor.fetchone()

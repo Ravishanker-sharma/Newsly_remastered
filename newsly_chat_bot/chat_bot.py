@@ -62,8 +62,20 @@ def news_chat(message,thread_id):
         Be very very Polite.
         '''
         msg = {"messages": [{"role":"system","content":prompt},{"role": "user", "content": message}]}
+        intialized_threads.add(thread_id)
     else:
         msg = {"messages": [{"role": "user", "content": message}]}
     config1 = {"configurable": {"thread_id": thread_id}}
     output = app.invoke(msg, config=config1)
     return output['messages'][-1].content
+
+def clear_threads(thread_id):
+    global intialized_threads
+    if thread_id not in intialized_threads:
+        intialized_threads.clear()
+
+
+def chat(message,thread_id):
+    clear_threads(thread_id)
+    return news_chat(message,thread_id)
+

@@ -1,7 +1,7 @@
 import chromadb
 import uuid
 
-client = chromadb.PersistentClient(path=r"F:\GraphNewsly\Database\Vectorbase")
+client = chromadb.PersistentClient(path=r"Vectorbase")
 
 base = client.get_or_create_collection("vectordata")
 

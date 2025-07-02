@@ -1,2 +1,2 @@
-from  .vectordatabase import *
-from .Sqlbase import *
+from  Database.vectordatabase import *
+from Database.Sqlbase import *
