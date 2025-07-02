@@ -1,11 +1,11 @@
-from langgraph.graph import StateGraph, END, add_messages
+from langgraph.graph import StateGraph, add_messages
 from typing import Annotated, TypedDict
 from langgraph.prebuilt import tools_condition, ToolNode
 from StoreNews.genralscraper import get_data
-from Database.vectordatabase import query_base
 from langchain.agents import Tool
 from langgraph.checkpoint.memory import MemorySaver
 from config import llm
+from Database.Sqlbase import fetch_news_via_id
 
 
 memory = MemorySaver()
@@ -18,11 +18,6 @@ tools = [
         name="GetData",
         func=get_data,
         description="Performs a websearch on basis of input and return data."
-    ),
-    Tool(
-        name="Search_vectorbase",
-        func=query_base,
-        description="Search for the relevent data from the Vector database and return data , accepts a List as a query"
     )
 ]
 
@@ -49,7 +44,10 @@ intialized_threads = set()
 
 def news_chat(message,thread_id):
     if thread_id not in intialized_threads:
+        context = str(fetch_news_via_id(thread_id))
+        print(context)
         prompt = '''
+        you are a News Assistant chatbot Developed by CODEX.
         You are a helpful News assistant chatbot, who provides unbiased and accurate news to the user.
         Format of news:
             Headline
@@ -59,14 +57,17 @@ def news_chat(message,thread_id):
                 Bullet point 4
                 Bullet point N
         Provide clear News do not add your own perspective in the news.
+        you will get some news details on which user may ask you about the news.
         Be very very Polite.
+        If you need to use the tool , use tool do not ask user.
         '''
-        msg = {"messages": [{"role":"system","content":prompt},{"role": "user", "content": message}]}
+        msg = {"messages": [{"role":"system","content":prompt},{"role": "user", "content": message},{"role":"system","content":f"News TOPIC FOR CHAT : {context}"}]}
         intialized_threads.add(thread_id)
     else:
         msg = {"messages": [{"role": "user", "content": message}]}
     config1 = {"configurable": {"thread_id": thread_id}}
     output = app.invoke(msg, config=config1)
+    print(output)
     return output['messages'][-1].content
 
 def clear_threads(thread_id):
@@ -78,4 +79,3 @@ def clear_threads(thread_id):
 def chat(message,thread_id):
     clear_threads(thread_id)
     return news_chat(message,thread_id)
-

@@ -102,13 +102,12 @@ def update_user_dislikes(dislikes,user_id):
     ''',(dislikes,user_id))
     conn.commit()
 
-
 def get_news(page_number):
         limit = 50
         offset = (page_number - 1) * limit
 
         query = """
-                SELECT id, headline, points, type,image_url,source_url,created_at
+                SELECT id, headline, points, type,image_url,source_url
                 FROM newsdata
                 ORDER BY created_at DESC
                     LIMIT %s \
@@ -134,8 +133,14 @@ def get_user_preference(user_id):
     query = '''
     SELECT  likes , dislikes FROM user_data WHERE user_id = %s
     '''
-    cursor.execute(query,user_id)
+    cursor.execute(query,(user_id,))
     prefer = cursor.fetchone()
     return prefer
 
+def fetch_news_via_id(news_id):
+    query = '''SELECT headline, points, type FROM newsdata WHERE id = %s'''
+    cursor.execute(query, (news_id,))
+    prefer = cursor.fetchone()
+    return str(prefer)
 
+# print(get_news(1))

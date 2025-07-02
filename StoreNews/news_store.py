@@ -1,6 +1,5 @@
 from config import llm,extract_json_from_llm_output
 from StoreNews.fetch_news_all_kind import fetch_raw_data
-import json , re
 import threading
 import time
 from Database.Sqlbase import update_news_data

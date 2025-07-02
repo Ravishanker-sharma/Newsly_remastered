@@ -1,1 +1,1 @@
-from .chat_bot import news_chat
+from newsly_chat_bot.chat_bot import *
