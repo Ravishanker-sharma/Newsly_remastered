@@ -47,7 +47,10 @@ if check_table_existence('user_data') == False:
     age INT,
     user_id TEXT,
     email TEXT UNIQUE NOT NULL,
-    preferences TEXT
+    preferences TEXT,
+    likes TEXT,
+    dislikes TEXT
+    
         )
     ''')
 
@@ -80,12 +83,25 @@ def update_user_data(user):
     except Exception as e:
         print(e)
 
-def update_user_preference(preference,user_id):
+def update_user_likes(likes,user_id):
+    cursor.execute("""  SELECT likes
+                        FROM user_data
+                        WHERE user_id = %s""", (user_id))
+    lik = cursor.fetchone()
+    likes = lik + tuple(likes)
     cursor.execute('''
-    UPDATE user_data SET preferences = %s WHERE user_id = %s
-    ''',(preference,user_id))
+    UPDATE user_data SET likes = %s WHERE user_id = %s
+    ''',(likes,user_id))
     conn.commit()
 
+def update_user_dislikes(dislikes,user_id):
+    cursor.execute("""  SELECT dislikes FROM user_data WHERE user_id =%s""",(user_id))
+    dis = cursor.fetchone()
+    dislikes = dis + tuple(dislikes)
+    cursor.execute('''
+    UPDATE user_data SET dislikes = %s WHERE user_id = %s
+    ''',(dislikes,user_id))
+    conn.commit()
 
 
 def get_news(page_number):
@@ -106,3 +122,19 @@ def get_news(page_number):
         conn.close()
         return rows
 
+def latest_news_id():
+    query = """
+            SELECT id
+            FROM newsdata
+            ORDER BY created_at DESC
+            LIMIT 1
+            """
+    cursor.execute(query)
+    latest_id = cursor.fetchone()
+    cursor.close()
+    conn.close()
+    return latest_id
+
+
+out = get_news(1)
+print(type(out[1]))
