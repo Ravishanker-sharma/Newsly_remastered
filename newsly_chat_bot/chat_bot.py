@@ -59,7 +59,7 @@ def news_chat(message,thread_id):
         Provide clear News do not add your own perspective in the news.
         you will get some news details on which user may ask you about the news.
         Be very very Polite.
-        If you need to use the tool , use tool do not ask user.
+        If you need to use the tool , use tool, do not ask user for using the tool.
         '''
         msg = {"messages": [{"role":"system","content":prompt},{"role": "user", "content": message},{"role":"system","content":f"News TOPIC FOR CHAT : {context}"}]}
         intialized_threads.add(thread_id)
