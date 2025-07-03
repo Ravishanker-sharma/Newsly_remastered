@@ -102,18 +102,18 @@ def update_user_dislikes(dislikes,user_id):
     ''',(dislikes,user_id))
     conn.commit()
 
-def get_news(page_number):
-        limit = 50
+def get_news(page_number,section,limit=20):
         offset = (page_number - 1) * limit
 
         query = """
                 SELECT id, headline, points, type,image_url,source_url
-                FROM newsdata
+                FROM newsdata WHERE type = %s
                 ORDER BY created_at DESC
                     LIMIT %s \
                 OFFSET %s \
+                
                 """
-        cursor.execute(query, (limit, offset))
+        cursor.execute(query, (section,limit, offset))
         rows = cursor.fetchall()
         return rows
 
@@ -143,4 +143,23 @@ def fetch_news_via_id(news_id):
     prefer = cursor.fetchone()
     return str(prefer)
 
-# print(get_news(1))
+def Format_news(page_number,section,limit=20):
+    news = get_news(page_number,section,limit)
+    output = []
+    for i in news:
+        info = dict()
+        info["id"] = i[0]
+        info["headline"] = i[1]
+        info["bulletPoints"] = i[2].split("..")
+        if i[4] == None or i[4] == "No_image" or i[4] == "":
+            info["imageUrl"] = r"https://res.cloudinary.com/dxysb8v1a/image/upload/fl_preserve_transparency/v1751529660/newslylogo_eyrc2v.jpg"
+        else:
+            info["imageUrl"] = i[4]
+        info["sourceIconUrl"] = i[5]
+        info["source"] = "Hindustan Times"
+        info["typeIconUrl"] = i[5]
+        info["type"] = i[3]
+        info["section"] = i[3].lower()
+        output.append(info)
+    return output
+
