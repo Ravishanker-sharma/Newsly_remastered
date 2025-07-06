@@ -71,16 +71,30 @@ def update_news_data():
     except Exception as e:
         print(e)
 
-def update_user_data(user):
+def login(user):
+    print(user)
     try:
+        # Step 1: Check if email exists
+        cursor.execute("SELECT * FROM user_data WHERE email = %s LIMIT 1", (user['email'],))
+        result = cursor.fetchone()
+
+        if result:
+            print("User exists:", result)
+            return result  # Return existing user
+
+        # Step 2: Insert new user if not found
+        user_id = str(uuid.uuid4())
         cursor.execute(
-            '''INSERT INTO user_data (name,age,user_id,email) VALUES (%s,%s,%s,%s)''',
-            (user['name'],user['age'],str(uuid.uuid4()),user['email'])
+            "INSERT INTO user_data (name, age, user_id, email) VALUES (%s, %s, %s, %s)",
+            (user['name'], user['age'], user_id, user['email'])
         )
         conn.commit()
         print("User Added!")
+        return user_id
+
     except Exception as e:
-        print(e)
+        print("Database error:", e)
+        return None
 
 def update_user_likes(likes,user_id):
     cursor.execute("""  SELECT likes
@@ -163,3 +177,6 @@ def Format_news(page_number,section,limit=20):
         output.append(info)
     return output
 
+
+if __name__ == '__main__':
+    print(get_news(1,'World'))

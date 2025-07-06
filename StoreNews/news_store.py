@@ -17,7 +17,7 @@ india_news = whole_data[2]
 education_news = whole_data[3]
 entertainment_news = whole_data[4]
 trending_news = whole_data[5]
-
+print(whole_data)
 instruction = """
 You will be provided with News data containing news in format of List[dictionary].
 Each Dictionary item is a different news.
@@ -72,6 +72,7 @@ def main():
     global final_data
     runner()
     result = final_data
+    print("Final Data:",result)
     with open('temp.txt','w',encoding='utf-8') as f:
         f.write(str(result))
     add_data()

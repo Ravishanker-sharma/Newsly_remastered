@@ -4,6 +4,7 @@ import os
 import json
 import re
 
+
 load_dotenv()
 api = os.getenv("GEMINI_API_KEY")
 
@@ -56,3 +57,4 @@ def extract_json_from_llm_output(text):
         print("Error parsing JSON after all recovery:", final_error)
         print("Original text:\n", text)
         return []
+

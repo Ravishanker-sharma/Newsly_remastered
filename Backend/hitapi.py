@@ -4,7 +4,7 @@ from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
 from newsly_chat_bot.chat_bot import chat as newsly_chat
-from Database.Sqlbase import Format_news
+from Database.Sqlbase import Format_news,login
 from datetime import datetime,timezone
 
 
@@ -47,7 +47,7 @@ def chat(message:ChatRequest):
 
 class FeedbackRequest(BaseModel):
     user_id: str
-    news_id: str
+    news_id: int
     feedback: str  # "like" or "dislike"
 
 class FeedbackResponse(BaseModel):
@@ -55,12 +55,32 @@ class FeedbackResponse(BaseModel):
 
 @app.post("/api/feedback",response_model=FeedbackResponse)
 def feedback(feedback: FeedbackRequest):
-    print("Received payload:", feedback)
+    print(feedback.news_id)
+    print(feedback.user_id)
+    print(feedback.feedback)
     if feedback.feedback == "like":
-        newsly_chat(f"Thanks for liking the news",feedback.news_id)
         return {"status":"success"}
     elif feedback.feedback == "dislike":
-        newsly_chat(f"Thanks for disliking the news",feedback.news_id)
         return {"status":"success"}
     else:
         return {"status":"failure"}
+
+
+
+class User(BaseModel):
+    fullName: str
+    age: int
+    email: str
+
+@app.post("/api/login")
+def log_user(user: User):
+    print("Received payload:", user.email)
+    data = dict()
+    data["email"] = user.email
+    data["name"] = user.fullName
+    data["age"] = user.age
+    result = login(data)
+    print("login results:",result[3])
+    return {
+  "user_id": result[3]
+    }

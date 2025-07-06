@@ -28,20 +28,25 @@ def smart_scrape(url,type=None  ):
         info = dict()
         temp_lis_h = []
         temp_lis_p = []
+        # headers = {
+        #     "User-Agent": (
+        #         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        #         "AppleWebKit/537.36 (KHTML, like Gecko) "
+        #         "Chrome/123.0.0.0 Safari/537.36"
+        #     ),
+        #     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        #     "Accept-Encoding": "gzip, deflate, br",
+        #     "Accept-Language": "en-US,en;q=0.9",
+        #     "Connection": "keep-alive",
+        #     "DNT": "1",  # Do Not Track
+        #     "Upgrade-Insecure-Requests": "1",
+        #     "Referer": "https://www.google.com/",
+        #     "Cache-Control": "no-cache",
+        # }
         headers = {
-            "User-Agent": (
-                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                "AppleWebKit/537.36 (KHTML, like Gecko) "
-                "Chrome/123.0.0.0 Safari/537.36"
-            ),
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-            "Accept-Encoding": "gzip, deflate, br",
-            "Accept-Language": "en-US,en;q=0.9",
-            "Connection": "keep-alive",
-            "DNT": "1",  # Do Not Track
-            "Upgrade-Insecure-Requests": "1",
-            "Referer": "https://www.google.com/",
-            "Cache-Control": "no-cache",
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                          "AppleWebKit/537.36 (KHTML, like Gecko) "
+                          "Chrome/114.0.0.0 Safari/537.36"
         }
 
         res = requests.get(url, headers=headers, timeout=15)
