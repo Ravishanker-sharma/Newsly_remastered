@@ -1,9 +1,9 @@
 from langchain_google_genai import ChatGoogleGenerativeAI
+import speech_recognition as sr
 from dotenv import load_dotenv
-import os
 import json
 import re
-
+import os
 
 load_dotenv()
 api = os.getenv("GEMINI_API_KEY")
@@ -57,4 +57,24 @@ def extract_json_from_llm_output(text):
         print("Error parsing JSON after all recovery:", final_error)
         print("Original text:\n", text)
         return []
+
+
+
+
+def convert_audio_to_text(audio_file_path):
+    recognizer = sr.Recognizer()
+
+    try:
+        with sr.AudioFile(audio_file_path) as source:
+            print("Listening to the file...")
+            audio_data = recognizer.record(source)  # read the entire audio file
+            print("Recognizing speech...")
+            text = recognizer.recognize_google(audio_data)
+            return text
+    except sr.UnknownValueError:
+        return "Sorry, could not understand the audio."
+    except sr.RequestError as e:
+        return f"Could not request results from Google Speech Recognition service; {e}"
+    except Exception as e:
+        return f"Error processing file: {e}"
 

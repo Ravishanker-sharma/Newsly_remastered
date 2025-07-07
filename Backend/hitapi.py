@@ -1,10 +1,13 @@
-from fastapi import FastAPI
+from fastapi import FastAPI,UploadFile,File,Form
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Optional
+from config import convert_audio_to_text
+import shutil
 from newsly_chat_bot.chat_bot import chat as newsly_chat
-from Database.Sqlbase import Format_news,login
+from Database.Sqlbase import Format_news,login,fetch_news_via_id
+from Database.vectordatabase import delete_existing,add_data
 from datetime import datetime,timezone
 
 
@@ -55,16 +58,18 @@ class FeedbackResponse(BaseModel):
 
 @app.post("/api/feedback",response_model=FeedbackResponse)
 def feedback(feedback: FeedbackRequest):
-    print(feedback.news_id)
-    print(feedback.user_id)
-    print(feedback.feedback)
+    doc_id = f"{feedback.user_id}_{feedback.news_id}"
+    metadata = dict(news_id=feedback.news_id,user_id=feedback.user_id,feedback=feedback.feedback,doc_id=doc_id)
+    news_data = fetch_news_via_id(metadata["news_id"])[1]
+    print(news_data)
+    delete_existing(metadata)
+    add_data(news_data,metadata)
     if feedback.feedback == "like":
         return {"status":"success"}
     elif feedback.feedback == "dislike":
         return {"status":"success"}
     else:
         return {"status":"failure"}
-
 
 
 class User(BaseModel):
@@ -84,3 +89,39 @@ def log_user(user: User):
     return {
   "user_id": result[3]
     }
+
+
+
+@app.post("/api/chat/voice")
+def chat_voice(
+        audio: UploadFile = File(...),
+    user_id: str = Form(...),
+    news_id: Optional[str] = Form(None),
+    conversation_id: Optional[str] = Form(None)
+):
+    file_path = "voice_message.wav"
+
+    # Save uploaded file (overwrite if exists)
+    with open(file_path, "wb") as buffer:
+        shutil.copyfileobj(audio.file, buffer)
+
+    result = convert_audio_to_text(file_path)
+    output = newsly_chat(result, news_id)
+    currenttime = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    return {
+  "message": output,
+  "conversation_id": conversation_id,
+  "timestamp": currenttime
+}
+
+@app.get("/api/chat/faqs")
+def chat_faqs(newsId:str):
+    faq = fetch_news_via_id(newsId)[3]
+    faqs = faq.split("||")
+    faq_lis = []
+    for i, que in enumerate(faqs):
+        d = dict()
+        d["id"]=str(i)
+        d["question"] = que
+        faq_lis.append(d)
+    return JSONResponse(faq_lis)

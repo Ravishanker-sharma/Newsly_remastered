@@ -11,7 +11,7 @@ class Localembed:
         return "Localembed"
 
 embed = Localembed()
-client = chromadb.PersistentClient(path=r"Vectorbase")
+client = chromadb.PersistentClient(path=r"/Users/ravisharma/PycharmProjects/Newsly_remastered/Vectorbase")
 
 base = client.get_or_create_collection("vectordata",embedding_function=embed)
 
@@ -23,6 +23,11 @@ def add_data(para,metadata):
     except Exception as e:
         print("ERROR :",e)
 
+def delete_existing(metadata):
+    try:
+        base.delete(where={"doc_id":metadata["doc_id"]})
+    except Exception as e:
+        print("ERROR :",e)
 
 def query_base(query,n = 2,where = None):
     print(where)
@@ -58,5 +63,9 @@ def probability_calculator(results):
         probability = (score / total_weight + 1) / 2
         probability_list.append(probability)
     return probability_list
+
+if __name__ == '__main__':
+    result = query_base(["heloooo"],n=3,where={"user_id":'7805cd98-58e6-421b-a561-8a24429cd421'})
+    print(probability_calculator(result))
 
 

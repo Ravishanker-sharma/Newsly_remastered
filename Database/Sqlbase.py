@@ -31,10 +31,12 @@ if check_table_existence('newsdata') == False:
     id SERIAL PRIMARY KEY,
     headline TEXT,
     points TEXT,
-    type TEXT,
+    section TEXT,
     image_url TEXT,
     source_url TEXT,
-    created_at TIMESTAMP
+    created_at TIMESTAMP,
+    type TEXT,
+    faq TEXT
     )
     """)
     print('Created Table : newsdata')
@@ -55,17 +57,19 @@ if check_table_existence('user_data') == False:
 
 def update_news_data():
     try :
-        with open('temp.txt', 'r', encoding='utf-8') as f:
+        with open('/Users/ravisharma/PycharmProjects/Newsly_remastered/Database/temp.txt', 'r', encoding='utf-8') as f:
             data = f.read()
         data = eval(data)
         print(len(data))
         for i in data:
             points = '.'.join(i["Paragraphs"])
+            faqs = '||'.join(i["faq"])
+            i['faq'] = faqs
             i['Paragraphs'] = points
             i["created_at"] = datetime.now().isoformat()
             cursor.execute(
-                '''INSERT INTO newsdata (headline,points,type,image_url,source_url,created_at) VALUES (%s,%s,%s,%s,%s,%s)''',
-                (i['headline'], i['Paragraphs'], i['type'], i['image_url'], i['source'], i['created_at']))
+                '''INSERT INTO newsdata (headline,points,section,image_url,source_url,created_at,type,faq) VALUES (%s,%s,%s,%s,%s,%s,%s,%s)''',
+                (i['headline'], i['Paragraphs'], i['section'], i['image_url'], i['source'], i['created_at'],i["type"],i["faq"]))
         conn.commit()
         print("News data Updated!")
     except Exception as e:
@@ -120,8 +124,8 @@ def get_news(page_number,section,limit=20):
         offset = (page_number - 1) * limit
 
         query = """
-                SELECT id, headline, points, type,image_url,source_url
-                FROM newsdata WHERE type = %s
+                SELECT id, headline, points,section,image_url,source_url,type,faq
+                FROM newsdata WHERE section = %s
                 ORDER BY created_at DESC
                     LIMIT %s \
                 OFFSET %s \
@@ -152,10 +156,10 @@ def get_user_preference(user_id):
     return prefer
 
 def fetch_news_via_id(news_id):
-    query = '''SELECT headline, points, type FROM newsdata WHERE id = %s'''
+    query = '''SELECT headline, points, section,faq  FROM newsdata WHERE id = %s'''
     cursor.execute(query, (news_id,))
     prefer = cursor.fetchone()
-    return str(prefer)
+    return prefer
 
 def Format_news(page_number,section,limit=20):
     news = get_news(page_number,section,limit)
@@ -171,12 +175,15 @@ def Format_news(page_number,section,limit=20):
             info["imageUrl"] = i[4]
         info["sourceIconUrl"] = i[5]
         info["source"] = "Hindustan Times"
-        info["typeIconUrl"] = i[5]
-        info["type"] = i[3]
         info["section"] = i[3].lower()
+        info["type"] = i[6].capitalize()
         output.append(info)
     return output
 
 
 if __name__ == '__main__':
-    print(get_news(1,'World'))
+    # update_news_data()
+    # data = get_news(1,'World')[1]
+    data = list(fetch_news_via_id(31))
+    print(data[3])
+

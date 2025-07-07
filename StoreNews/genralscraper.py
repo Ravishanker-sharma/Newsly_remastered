@@ -23,8 +23,8 @@ def contains_binary_or_corrupt(text: str) -> bool:
 
     return False
 
-def smart_scrape(url,type=None  ):
-        print(f"⚠⚠ Running for Url[{url}] || Type : {type} ⚠⚠")
+def smart_scrape(url, section=None):
+        print(f"⚠⚠ Running for Url[{url}] || Type : {section} ⚠⚠")
         info = dict()
         temp_lis_h = []
         temp_lis_p = []
@@ -74,8 +74,8 @@ def smart_scrape(url,type=None  ):
         info["headlines"] = temp_lis_h
         info["Paragraphs"] = list(set(temp_lis_p))
         info["source"] = url
-        if type != None:
-            info["type"] = type
+        if section != None:
+            info["section"] = section
         return info
 
 @tool
