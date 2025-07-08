@@ -30,7 +30,6 @@ def delete_existing(metadata):
         print("ERROR :",e)
 
 def query_base(query,n = 2,where = None):
-    print(where)
     if where != None:
         results = base.query(query_texts=query, n_results=n,where=where)
     else:
@@ -39,7 +38,6 @@ def query_base(query,n = 2,where = None):
     return results
 
 def probability_calculator(results):
-    probability_list = []
     if not results or not results['metadatas']:
         return 0
     for j in range(len(results['metadatas'])):
@@ -61,8 +59,8 @@ def probability_calculator(results):
             return 0
 
         probability = (score / total_weight + 1) / 2
-        probability_list.append(probability)
-    return probability_list
+
+    return probability
 
 if __name__ == '__main__':
     result = query_base(["heloooo"],n=3,where={"user_id":'7805cd98-58e6-421b-a561-8a24429cd421'})

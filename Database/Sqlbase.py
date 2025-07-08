@@ -120,20 +120,34 @@ def update_user_dislikes(dislikes,user_id):
     ''',(dislikes,user_id))
     conn.commit()
 
-def get_news(page_number,section,limit=20):
+def get_news(page_number,section=None,limit=20):
         offset = (page_number - 1) * limit
+        if section != None:
+            query = """
+                    SELECT id, headline, points, section, image_url, source_url, type, faq
+                    FROM newsdata \
+                    WHERE section = %s
+                    ORDER BY created_at DESC
+                        LIMIT %s \
+                    OFFSET %s \
+ \
+                    """
+            cursor.execute(query, (section, limit, offset))
+            rows = cursor.fetchall()
+            return rows
+        else:
+            query = """
+                    SELECT id, headline, points, section, image_url, source_url, type, faq
+                    FROM newsdata \
+                    ORDER BY created_at DESC
+                        LIMIT %s \
+                    OFFSET %s \
+ \
+                    """
+            cursor.execute(query, (limit, offset))
+            rows = cursor.fetchall()
+            return rows
 
-        query = """
-                SELECT id, headline, points,section,image_url,source_url,type,faq
-                FROM newsdata WHERE section = %s
-                ORDER BY created_at DESC
-                    LIMIT %s \
-                OFFSET %s \
-                
-                """
-        cursor.execute(query, (section,limit, offset))
-        rows = cursor.fetchall()
-        return rows
 
 def latest_news_id():
     query = """
@@ -183,7 +197,7 @@ def Format_news(page_number,section,limit=20):
 
 if __name__ == '__main__':
     # update_news_data()
-    # data = get_news(1,'World')[1]
-    data = list(fetch_news_via_id(31))
+    data = get_news(1,"World")[1]
+    # data = list(fetch_news_via_id(31))
     print(data[3])
 

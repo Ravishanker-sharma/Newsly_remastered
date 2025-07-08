@@ -9,7 +9,7 @@ from newsly_chat_bot.chat_bot import chat as newsly_chat
 from Database.Sqlbase import Format_news,login,fetch_news_via_id
 from Database.vectordatabase import delete_existing,add_data
 from datetime import datetime,timezone
-
+from Backend.display_personalized_news import for_you_section
 
 app = FastAPI()
 
@@ -25,6 +25,8 @@ app.add_middleware(
 @app.get("/api/news")
 def read_root(section:str, page: int = 1, user_id: Optional[str] = None, limit: Optional[int] = 20):
     section = section.capitalize()
+    if section == "For-you":
+        return for_you_section(page, user_id, limit)
     print(section)
     out = Format_news(page,section,limit)
     print(page)
