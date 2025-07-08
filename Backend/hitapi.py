@@ -10,6 +10,7 @@ from Database.Sqlbase import Format_news,login,fetch_news_via_id
 from Database.vectordatabase import delete_existing,add_data
 from datetime import datetime,timezone
 from Backend.display_personalized_news import for_you_section
+from Backend.Getdetails import details
 
 app = FastAPI()
 
@@ -127,3 +128,8 @@ def chat_faqs(newsId:str):
         d["question"] = que
         faq_lis.append(d)
     return JSONResponse(faq_lis)
+
+@app.get("/api/news/detailed")
+def news_detailed(news_id:str,user_id:str):
+    output = details(news_id)
+    return output

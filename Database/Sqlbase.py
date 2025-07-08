@@ -170,7 +170,7 @@ def get_user_preference(user_id):
     return prefer
 
 def fetch_news_via_id(news_id):
-    query = '''SELECT headline, points, section,faq  FROM newsdata WHERE id = %s'''
+    query = '''SELECT headline, points, section,faq,image_url  FROM newsdata WHERE id = %s'''
     cursor.execute(query, (news_id,))
     prefer = cursor.fetchone()
     return prefer
@@ -197,7 +197,7 @@ def Format_news(page_number,section,limit=20):
 
 if __name__ == '__main__':
     # update_news_data()
-    data = get_news(1,"World")[1]
-    # data = list(fetch_news_via_id(31))
-    print(data[3])
+    # data = get_news(1,"World")[1]
+    data = list(fetch_news_via_id(31))
+    print(data[4])
 
