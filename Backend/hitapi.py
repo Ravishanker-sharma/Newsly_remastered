@@ -1,4 +1,4 @@
-from fastapi import FastAPI,UploadFile,File,Form
+from fastapi import FastAPI,UploadFile,File,Form,HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -6,7 +6,7 @@ from typing import Optional
 from config import convert_audio_to_text
 import shutil
 from newsly_chat_bot.chat_bot import chat as newsly_chat
-from Database.Sqlbase import Format_news,login,fetch_news_via_id
+from Database.Sqlbase import Format_news,login,fetch_news_via_id,signup,check_user
 from Database.vectordatabase import delete_existing,add_data
 from datetime import datetime,timezone
 from Backend.display_personalized_news import for_you_section
@@ -79,19 +79,24 @@ class User(BaseModel):
     fullName: str
     age: int
     email: str
+    password: str
 
 @app.post("/api/login")
 def log_user(user: User):
-    print("Received payload:", user.email)
+    print("Received payload:", user.email,user.password)
     data = dict()
     data["email"] = user.email
-    data["name"] = user.fullName
-    data["age"] = user.age
-    result = login(data)
-    print("login results:",result[3])
-    return {
-  "user_id": result[3]
-    }
+    data["password"] = user.password
+    if check_user(data) == 1:
+        print("login results: Loged in !")
+        result = login(data)
+        print("login results:",result)
+        return {
+      "user_id": result
+        }
+    else:
+        print("login results: raised a error!")
+        raise HTTPException(status_code=401,detail="Invalid credentials")
 
 
 
@@ -133,3 +138,18 @@ def chat_faqs(newsId:str):
 def news_detailed(news_id:str,user_id:str):
     output = details(news_id)
     return output
+
+@app.post("/api/register")
+def register(user: User):
+    data = dict()
+    data["email"] = user.email
+    data["name"] = user.fullName
+    data["age"] = user.age
+    data["password"]=user.password
+    if check_user(data) == 0:
+        result = signup(data)
+        print("signup results: Created user !")
+        return {"user_id": result}
+    else:
+        print("signup results: Raised a error!")
+        raise HTTPException(status_code=400, detail="Email already registered")

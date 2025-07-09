@@ -1,6 +1,7 @@
 import psycopg2
 from datetime import datetime
 import uuid
+import bcrypt
 conn = psycopg2.connect(
     dbname = 'newsly_base',
     password = '1234',
@@ -49,10 +50,8 @@ if check_table_existence('user_data') == False:
     age INT,
     user_id TEXT,
     email TEXT UNIQUE NOT NULL,
-    likes TEXT,
-    dislikes TEXT
-    
-        )
+    password TEXT
+    )
     ''')
 
 def update_news_data():
@@ -75,8 +74,10 @@ def update_news_data():
     except Exception as e:
         print(e)
 
-def login(user):
+def signup(user):
     print(user)
+    password_hash = bcrypt.hashpw(user['password'].encode('utf-8'), bcrypt.gensalt())
+    password = password_hash.decode('utf-8')
     try:
         # Step 1: Check if email exists
         cursor.execute("SELECT * FROM user_data WHERE email = %s LIMIT 1", (user['email'],))
@@ -89,8 +90,8 @@ def login(user):
         # Step 2: Insert new user if not found
         user_id = str(uuid.uuid4())
         cursor.execute(
-            "INSERT INTO user_data (name, age, user_id, email) VALUES (%s, %s, %s, %s)",
-            (user['name'], user['age'], user_id, user['email'])
+            "INSERT INTO user_data (name, age, user_id, email,password) VALUES (%s, %s, %s, %s,%s)",
+            (user['name'], user['age'], user_id, user['email'],password)
         )
         conn.commit()
         print("User Added!")
@@ -100,25 +101,27 @@ def login(user):
         print("Database error:", e)
         return None
 
-def update_user_likes(likes,user_id):
-    cursor.execute("""  SELECT likes
-                        FROM user_data
-                        WHERE user_id = %s""", (user_id))
-    lik = cursor.fetchone()
-    likes = lik + tuple(likes)
-    cursor.execute('''
-    UPDATE user_data SET likes = %s WHERE user_id = %s
-    ''',(likes,user_id))
-    conn.commit()
+def login(user):
+    try:
+        cursor.execute("SELECT password,user_id FROM user_data WHERE email = %s", (user['email'],))
+        result = cursor.fetchone()
+        password = result[0].encode('utf-8')
+        if bcrypt.checkpw(user['password'].encode('utf-8'),password):
+            return result[1]
+        else:
+            return False
+    except Exception as e:
+        print("Database error:", e)
 
-def update_user_dislikes(dislikes,user_id):
-    cursor.execute("""  SELECT dislikes FROM user_data WHERE user_id =%s""",(user_id))
-    dis = cursor.fetchone()
-    dislikes = dis + tuple(dislikes)
-    cursor.execute('''
-    UPDATE user_data SET dislikes = %s WHERE user_id = %s
-    ''',(dislikes,user_id))
-    conn.commit()
+def check_user(user):
+    try:
+        cursor.execute("SELECT * FROM user_data WHERE email = %s", (user['email'],))
+        return 1
+    except Exception as e :
+        print("Database error:", e)
+        return 0
+
+
 
 def get_news(page_number,section=None,limit=20):
         offset = (page_number - 1) * limit
@@ -198,6 +201,6 @@ def Format_news(page_number,section,limit=20):
 if __name__ == '__main__':
     # update_news_data()
     # data = get_news(1,"World")[1]
-    data = list(fetch_news_via_id(31))
-    print(data[4])
+    data = list(fetch_news_via_id(85))
+    print(data)
 
