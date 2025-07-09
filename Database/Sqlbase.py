@@ -115,12 +115,15 @@ def login(user):
 
 def check_user(user):
     try:
-        cursor.execute("SELECT * FROM user_data WHERE email = %s", (user['email'],))
-        return 1
-    except Exception as e :
+        cursor.execute("SELECT * FROM user_data WHERE email = %s", (user["email"],))
+        result = cursor.fetchone()
+        if result:
+            return 1  # User exists
+        else:
+            return 0  # No user found
+    except Exception as e:
         print("Database error:", e)
         return 0
-
 
 
 def get_news(page_number,section=None,limit=20):

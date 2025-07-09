@@ -38,29 +38,48 @@ def query_base(query,n = 2,where = None):
     return results
 
 def probability_calculator(results):
-    if not results or not results['metadatas']:
+    if not results or not results.get('metadatas'):
         return 0
-    for j in range(len(results['metadatas'])):
-        metadatas = results['metadatas'][j]
-        distances = results['distances'][j]
-        if not metadatas or not distances:
-            return 0
-        score = 0
-        total_weight = 0
-        for prefer, dist in zip(metadatas, distances):
-            weight = 1 / (dist + 1e-6)
-            if prefer["feedback"].lower() == "like":
-                score += weight
-            elif prefer["feedback"].lower() == "dislike":
-                score -= weight
-            total_weight += weight
 
-        if total_weight == 0:
-            return 0
+    metadatas = results['metadatas'][0]
+    distances = results['distances'][0]
 
+    if not metadatas or not distances:
+        return 0
+
+    score = 0
+    total_weight = 0
+    has_like = False
+    has_dislike = False
+
+    for prefer, dist in zip(metadatas, distances):
+        weight = 1 / (dist + 1e-6)
+        feedback = prefer.get("feedback", "").lower()
+        if feedback == "like":
+            score += weight
+            has_like = True
+        elif feedback == "dislike":
+            score -= weight
+            has_dislike = True
+        total_weight += weight
+
+    if total_weight == 0:
+        return 0
+
+    if has_like and has_dislike:
+        # Mixed feedback – use full normalized formula
         probability = (score / total_weight + 1) / 2
+    elif has_like:
+        # Only positive feedback: estimate probability from weighted closeness
+        probability = min(1.0, total_weight / (total_weight + 5))  # tunable
+    elif has_dislike:
+        # Only negative feedback: invert closeness
+        probability = max(0.0, 1 - (total_weight / (total_weight + 5)))  # tunable
+    else:
+        probability = 0.5  # fallback
 
     return probability
+
 
 if __name__ == '__main__':
     result = query_base(["heloooo"],n=3,where={"user_id":'7805cd98-58e6-421b-a561-8a24429cd421'})

@@ -74,7 +74,9 @@ def feedback(feedback: FeedbackRequest):
     else:
         return {"status":"failure"}
 
-
+class Log(BaseModel):
+    email: str
+    password: str
 class User(BaseModel):
     fullName: str
     age: int
@@ -82,7 +84,7 @@ class User(BaseModel):
     password: str
 
 @app.post("/api/login")
-def log_user(user: User):
+def log_user(user: Log):
     print("Received payload:", user.email,user.password)
     data = dict()
     data["email"] = user.email
@@ -91,7 +93,7 @@ def log_user(user: User):
         print("login results: Loged in !")
         result = login(data)
         print("login results:",result)
-        return {
+        return {"fullName":"Name",
       "user_id": result
         }
     else:
