@@ -1,13 +1,14 @@
 from StoreNews.hindustandscaper import scrape_ht_world_news_page
 from StoreNews.genralscraper import smart_scrape
+from StoreNews.Indianexpressscraper import fetch_india_news_links
 import threading
 
-world_url = "https://www.hindustantimes.com/world-news/page-"
-sports_url = "https://www.hindustantimes.com/sports/page-"
-india_url = "https://www.hindustantimes.com/india-news/page-"
-education_url = "https://www.hindustantimes.com/education/page-"
-entertainment_url = "https://www.hindustantimes.com/entertainment/page-"
-trending_url = "https://www.hindustantimes.com/trending/page-"
+world_url = ["https://www.hindustantimes.com/world-news","https://indianexpress.com/section/world/page/1/"]
+sports_url = ["https://www.hindustantimes.com/sports","https://indianexpress.com/section/sports/page/1/"]
+india_url = ["https://www.hindustantimes.com/india-news","https://indianexpress.com/section/india/page/1/"]
+education_url = ["https://www.hindustantimes.com/education","https://indianexpress.com/section/education/page/1/"]
+entertainment_url = ["https://www.hindustantimes.com/entertainment","https://indianexpress.com/section/entertainment/page/1/"]
+trending_url = ["https://www.hindustantimes.com/trending","https://indianexpress.com/section/trending/page/1/"]
 
 # Store links for each category
 world = []
@@ -18,17 +19,30 @@ entertainment = []
 trending = []
 
 lock = threading.Lock()
+lock2 = threading.Lock()
 
 def fetch_news_link():
-    def store_news_list(url,lis):
+    def hinduT_news_list(url,lis):
         out = list(set(scrape_ht_world_news_page(url)))
-        lis.extend(out)
-    threads = [threading.Thread(target=store_news_list,args=(world_url,world))
-               ,threading.Thread(target=store_news_list,args=(sports_url,sports)),
-               threading.Thread(target=store_news_list,args=(india_url,india))
-               ,threading.Thread(target=store_news_list,args=(education_url,education))
-               ,threading.Thread(target=store_news_list,args=(entertainment_url,entertainment)),
-               threading.Thread(target=store_news_list,args=(trending_url,trending))]
+        with lock2:
+            lis.extend(out)
+
+    def indianex_news_list(url,lis):
+        out = fetch_india_news_links(url)
+        with lock2:
+            lis.extend(out)
+    threads = [threading.Thread(target=hinduT_news_list,args=(world_url[0],world))
+               ,threading.Thread(target=hinduT_news_list,args=(sports_url[0],sports)),
+               threading.Thread(target=hinduT_news_list,args=(india_url[0],india))
+               ,threading.Thread(target=hinduT_news_list,args=(education_url[0],education))
+               ,threading.Thread(target=hinduT_news_list,args=(entertainment_url[0],entertainment)),
+               threading.Thread(target=hinduT_news_list,args=(trending_url[0],trending)),
+               threading.Thread(target=indianex_news_list,args=(world_url[1],world))
+               ,threading.Thread(target=indianex_news_list,args=(sports_url[1],sports)),
+               threading.Thread(target=indianex_news_list,args=(india_url[1],india))
+               ,threading.Thread(target=indianex_news_list,args=(education_url[1],education))
+               ,threading.Thread(target=indianex_news_list,args=(entertainment_url[1],entertainment)),
+               threading.Thread(target=indianex_news_list,args=(trending_url[1],trending))]
 
     for t in threads:
         t.start()
@@ -71,10 +85,11 @@ def fetch_raw_data():
     return world_news,sports_news,india_news,education_news,entertainment_news,trending_news
 
 if __name__ == '__main__':
-    out = fetch_raw_data()
-    print(len(out))
-    print(out)
-    for i in out:
-        for n,j in enumerate(i):
-            print(n,j)
-        print("_"*100)
+    # out = fetch_raw_data()
+    # print(len(out))
+    # print(out)
+    # for i in out:
+    #     for n,j in enumerate(i):
+    #         print(n,j)
+    #     print("_"*100)
+    print(fetch_news_link())

@@ -194,7 +194,20 @@ def Format_news(page_number,section,limit=20):
         else:
             info["imageUrl"] = i[4]
         info["sourceIconUrl"] = i[5]
-        info["source"] = "Hindustan Times"
+        if "indianexpress.com" in i[5].lower():
+            info["source"] = "Indian Express"
+        elif "thehindu.com" in i[5].lower():
+            info["source"] = "The Hindu"
+        elif "thetimes.com" in i[5].lower():
+            info["source"] = "The Times"
+        elif "thehindubusinessline.com" in i[5].lower():
+            info["source"] = "The Hindu Business Line"
+        elif "thehindu.in" in i[5].lower():
+            info["source"] = "The Hindu"
+        elif "hindustantimes.com" in i[5].lower():
+            info["source"] = "Hindustan Times"
+        else:
+            info["source"] = "Newsly"
         info["section"] = i[3].lower()
         info["type"] = i[6].capitalize()
         output.append(info)

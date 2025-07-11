@@ -7,10 +7,23 @@ import os
 
 load_dotenv()
 api = os.getenv("GEMINI_API_KEY")
+api2 = os.getenv("GEMINI_API_KEY2")
+api3 = os.getenv("GEMINI_API_KEY3")
+
 
 llm = ChatGoogleGenerativeAI(
     model="gemini-2.0-flash",
     api_key = api,
+    temperature=0.7
+)
+llm2 = ChatGoogleGenerativeAI(
+    model="gemini-2.0-flash",
+    api_key = api2,
+    temperature=0.7
+)
+llm3 = ChatGoogleGenerativeAI(
+    model="gemini-2.0-flash",
+    api_key = api3,
     temperature=0.7
 )
 def extract_json_from_llm_output(text):

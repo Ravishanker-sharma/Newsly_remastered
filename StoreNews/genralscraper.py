@@ -4,9 +4,134 @@ from StoreNews.yahoosearchengine import yahoo_search
 from langchain.agents import tool
 import re
 import threading
-
+import random
 data = []
 lock = threading.Lock()
+HEADERS_LIST = [
+    {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/124.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Upgrade-Insecure-Requests": "1",
+        "Referer": "https://www.google.com/",
+        "DNT": "1",
+        "Cache-Control": "no-cache"
+    },
+    {
+        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 13_3_1) "
+                      "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+                      "Version/16.4 Safari/605.1.15",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "en-US,en;q=0.8",
+        "Connection": "keep-alive",
+        "Referer": "https://www.bing.com/",
+        "Upgrade-Insecure-Requests": "1"
+    },
+    {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; rv:112.0) Gecko/20100101 Firefox/112.0",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "en-GB,en;q=0.5",
+        "Connection": "keep-alive",
+        "DNT": "1",
+        "Upgrade-Insecure-Requests": "1"
+    },
+    {
+        "User-Agent": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_4 like Mac OS X) "
+                      "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+                      "Version/16.4 Mobile/15E148 Safari/604.1",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Referer": "https://www.google.com/",
+        "Connection": "keep-alive"
+    },
+    {
+        "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/113.0.0.0 Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "DNT": "1"
+    },
+    {
+        "User-Agent": "Mozilla/5.0 (Linux; Android 12; SM-G991B) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/114.0.0.0 Mobile Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-GB,en;q=0.5",
+        "Referer": "https://www.google.com/",
+        "Connection": "keep-alive"
+    },
+    {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; WOW64; rv:102.0) Gecko/20100101 Firefox/102.0",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "en-US,en;q=0.5",
+        "Upgrade-Insecure-Requests": "1",
+        "Connection": "keep-alive"
+    },
+    {
+        "User-Agent": "Mozilla/5.0 (iPad; CPU OS 15_7 like Mac OS X) "
+                      "AppleWebKit/605.1.15 (KHTML, like Gecko) "
+                      "Version/15.0 Mobile/15E148 Safari/604.1",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Connection": "keep-alive",
+        "Referer": "https://www.google.com/"
+    },
+    {
+        "User-Agent": "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/109.0",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        "Accept-Encoding": "gzip, deflate, br",
+        "Accept-Language": "en-US,en;q=0.5",
+        "DNT": "1",
+        "Connection": "keep-alive"
+    },
+    {
+        "User-Agent": "Mozilla/5.0 (Linux; Android 11; Pixel 4 XL) "
+                      "AppleWebKit/537.36 (KHTML, like Gecko) "
+                      "Chrome/117.0.0.0 Mobile Safari/537.36",
+        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
+        "Accept-Language": "en-US,en;q=0.9",
+        "Connection": "keep-alive",
+        "Referer": "https://www.bing.com/"
+    }
+]
+
+
+def extract_image_url(soup, domain):
+    # Hindustan Times
+    if "hindustantimes.com" in domain:
+        container = soup.find('div', class_='storyParagraphFigure')
+        if container:
+            image = container.find('img')
+            if image:
+                image_url = image.get('src')
+                if image_url and "default" not in image_url.lower():
+                    return image_url
+        return "No_image"
+
+    # Indian Express
+    elif "indianexpress.com" in domain:
+        container = (
+            soup.find('span',class_ = 'custom-caption')
+        )
+        if container:
+            image = container.find('img')
+            if image:
+                image_url = image.get('src') or image.get('data-src')
+                if image_url and "default" not in image_url.lower():
+                    return image_url
+        return "No_image"
+
+    # Other unsupported domains
+    return "No_image"
 
 def contains_binary_or_corrupt(text: str) -> bool:
     # Detects replacement characters (�)
@@ -28,26 +153,7 @@ def smart_scrape(url, section=None):
         info = dict()
         temp_lis_h = []
         temp_lis_p = []
-        # headers = {
-        #     "User-Agent": (
-        #         "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-        #         "AppleWebKit/537.36 (KHTML, like Gecko) "
-        #         "Chrome/123.0.0.0 Safari/537.36"
-        #     ),
-        #     "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8",
-        #     "Accept-Encoding": "gzip, deflate, br",
-        #     "Accept-Language": "en-US,en;q=0.9",
-        #     "Connection": "keep-alive",
-        #     "DNT": "1",  # Do Not Track
-        #     "Upgrade-Insecure-Requests": "1",
-        #     "Referer": "https://www.google.com/",
-        #     "Cache-Control": "no-cache",
-        # }
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
-                          "AppleWebKit/537.36 (KHTML, like Gecko) "
-                          "Chrome/114.0.0.0 Safari/537.36"
-        }
+        headers = random.choice(HEADERS_LIST)
 
         res = requests.get(url, headers=headers, timeout=15)
         soup = BeautifulSoup(res.text, "html.parser")
@@ -55,17 +161,7 @@ def smart_scrape(url, section=None):
         # Try to get titles, headlines, paragraphs
         headlines = soup.find_all(["h1", "h2", "h3"], limit=20)
         paragraphs = soup.find_all("p")
-        container = soup.find('div', class_='storyParagraphFigure')
-        if container:
-            image = container.find('img')
-            if image:
-                image_url = image['src']
-                if "default" in str(image_url).lower():
-                    info["image_url"] = "No_image"
-                else:
-                    info["image_url"] = image_url
-            else :
-                info["image_url"] = "No_image"
+        info["image_url"] = extract_image_url(soup, url)
 
         for h in headlines:
             temp_lis_h.append("📰 " + h.get_text(strip=True))
@@ -110,7 +206,7 @@ def get_data(querry:str):
     return data
 
 if __name__ == '__main__':
-    print(get_data("india and pakistan war"))
-    # out= smart_scrape("https://www.hindustantimes.com/cities/delhi-news/delhi-ndft-seeks-ugc-rule-change-recognition-for-ad-hoc-du-teachers-101750703296295.html")
-    # print(out)
-    # print(len(out))
+    # print(get_data("india and pakistan war"))
+    out= smart_scrape("https://indianexpress.com/article/cities/chandigarh/rs-49000-crore-ponzi-scheme-pacl-gurnam-singh-arrest-10119769/?ref=hometop_hp")
+    print(out)
+    print(len(out))

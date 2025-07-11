@@ -1,6 +1,6 @@
 from Database.Sqlbase import fetch_news_via_id
 from StoreNews.genralscraper import get_data
-from config import llm
+from config import llm3
 from langchain.chains import LLMChain
 from langchain.prompts import PromptTemplate
 from langchain.output_parsers import PydanticOutputParser
@@ -49,7 +49,7 @@ Respond in this format (don’t explain anything):
 
     parser = PydanticOutputParser(pydantic_object=AgentOutput)
 
-    chain = LLMChain(llm=llm, prompt=prompt, output_parser=parser)
+    chain = LLMChain(llm=llm3, prompt=prompt, output_parser=parser)
 
     output = (chain.run({"raw_news": data})).dict()
     output["id"] = news_id

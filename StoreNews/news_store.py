@@ -1,9 +1,23 @@
-from config import llm,extract_json_from_llm_output
+from config import llm2,extract_json_from_llm_output
 from StoreNews.fetch_news_all_kind import fetch_raw_data
 import threading
 import time
+from langchain.output_parsers import PydanticOutputParser
+from pydantic import BaseModel
+from langchain.prompts import PromptTemplate
 from Database.Sqlbase import update_news_data
+from Database.duplicate import check_for_duplicate
+from typing import List,Dict
 
+
+class Newsitem(BaseModel):
+    image_url : str
+    headline : str
+    Paragraphs : list
+    section : str
+    source : str
+    type : str
+    faq : list
 page = 1  # Will try to implement later
 final_data = []
 lock = threading.Lock()
@@ -39,7 +53,7 @@ Finally provide output in this format:
 
 def build_outputs(data):
     prompt = f"Instruction : {instruction}; Raw News Data : {data}"
-    output = llm.invoke(prompt).content
+    output = llm2.invoke(prompt).content
     return extract_json_from_llm_output(output)
 
 
@@ -48,8 +62,8 @@ def runner():
     print("Runner Is Executed!")
     def get_output(lis):
         if lis:
-            out = build_outputs(lis[:30])
-            del lis[:30]
+            out = build_outputs(lis[:50])
+            del lis[:50]
             with lock:
                 final_data.extend(out)
 
@@ -74,10 +88,16 @@ def main():
     runner()
     result = final_data
     print("Final Data:",result)
+    checked = []
+    for item in result:
+        out = check_for_duplicate(item["headline"])
+        if not out:
+            checked.append(item)
     with open(r'/Users/ravisharma/PycharmProjects/Newsly_remastered/Database/temp.txt', 'w', encoding='utf-8') as f:
-        f.write(str(result))
+        f.write(str(checked))
     update_news_data()
-    final_data = []
+    checked.clear()
+    final_data.clear()
     if world_news or sports_news or india_news or education_news or entertainment_news or trending_news:
         print("~" * 25, "Length", "~" * 25)
         print(len(world_news))
