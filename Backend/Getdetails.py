@@ -17,6 +17,7 @@ class AgentOutput(BaseModel):
 
 
 def details(news_id):
+    n = 0
     query = fetch_news_via_id(news_id)
     data = get_data(query[0])
     prompt_template = """
@@ -26,7 +27,7 @@ Rules:
 - Do not add opinions.
 - fullContent must be very detailed (1000+ words).
 - Output must be a **valid JSON** object only.
-
+- In source , only use namest of the news source upto 3 names. 
 Raw News:
 {raw_news}
 
@@ -47,16 +48,21 @@ Respond in this format (don’t explain anything):
         template=prompt_template
     )
 
-    parser = PydanticOutputParser(pydantic_object=AgentOutput)
+    while n<3:
+        try:
+            parser = PydanticOutputParser(pydantic_object=AgentOutput)
 
-    chain = LLMChain(llm=llm3, prompt=prompt, output_parser=parser)
+            chain = LLMChain(llm=llm3, prompt=prompt, output_parser=parser)
 
-    output = (chain.run({"raw_news": data})).dict()
-    output["id"] = news_id
-    if query[4] == None or query[4] == "No_image" or query[4] == "":
-        output[
-            "imageUrl"] = r"https://res.cloudinary.com/dxysb8v1a/image/upload/fl_preserve_transparency/v1751529660/newslylogo_eyrc2v.jpg"
-    else:
-        output["imageUrl"] = query[4]
-    return output
-
+            output = (chain.run({"raw_news": data})).dict()
+            output["id"] = news_id
+            if query[4] == None or query[4] == "No_image" or query[4] == "":
+                output[
+                    "imageUrl"] = r"https://res.cloudinary.com/dxysb8v1a/image/upload/fl_preserve_transparency/v1751529660/newslylogo_eyrc2v.jpg"
+            else:
+                output["imageUrl"] = query[4]
+            return output
+        except Exception as e:
+            print(e)
+            n += 1
+            continue

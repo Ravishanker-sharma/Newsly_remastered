@@ -45,7 +45,7 @@ intialized_threads = set()
 def news_chat(message,thread_id):
     if thread_id not in intialized_threads:
         context = str(fetch_news_via_id(thread_id))
-        print(context)
+        # print(context)
         prompt = '''
         you are a News Assistant chatbot Developed by CODEX.
         You are a helpful News assistant chatbot, who provides unbiased and accurate news to the user.
@@ -67,7 +67,7 @@ def news_chat(message,thread_id):
         msg = {"messages": [{"role": "user", "content": message}]}
     config1 = {"configurable": {"thread_id": thread_id}}
     output = app.invoke(msg, config=config1)
-    print(output)
+    # print(output)
     return output['messages'][-1].content
 
 def clear_threads(thread_id):

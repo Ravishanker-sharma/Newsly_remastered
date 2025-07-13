@@ -207,6 +207,6 @@ def get_data(querry:str):
 
 if __name__ == '__main__':
     # print(get_data("india and pakistan war"))
-    out= smart_scrape("https://indianexpress.com/article/cities/chandigarh/rs-49000-crore-ponzi-scheme-pacl-gurnam-singh-arrest-10119769/?ref=hometop_hp")
+    out= smart_scrape("https://www.ndtv.com/india-news/aurobindo-handa-aaib-ahmedabad-crash-should-changing-switches-have-been-a-must-on-air-india-crash-expert-says-8866664")
     print(out)
     print(len(out))

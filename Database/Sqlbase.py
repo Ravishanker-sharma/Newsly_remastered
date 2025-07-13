@@ -130,7 +130,7 @@ def get_news(page_number,section=None,limit=20):
         offset = (page_number - 1) * limit
         if section != None:
             query = """
-                    SELECT id, headline, points, section, image_url, source_url, type, faq
+                    SELECT id, headline, points, section, image_url, source_url, type, faq,created_at
                     FROM newsdata \
                     WHERE section = %s
                     ORDER BY created_at DESC
@@ -210,6 +210,7 @@ def Format_news(page_number,section,limit=20):
             info["source"] = "Newsly"
         info["section"] = i[3].lower()
         info["type"] = i[6].capitalize()
+        info["createdAt"] = i[8]
         output.append(info)
     return output
 
