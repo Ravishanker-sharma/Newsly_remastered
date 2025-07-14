@@ -1,10 +1,11 @@
 from fastapi import HTTPException
 from pydantic import BaseModel
+import os
 from google.oauth2 import id_token
 from google.auth.transport import requests as grequests
-
-
-GOOGLE_CLIENT_ID = "46098886946-bc3j612rc9je4slsvuaqa72m03g9i7ke.apps.googleusercontent.com"
+from dotenv import load_dotenv
+load_dotenv()
+GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 def google_auth(data):
     try:
@@ -33,7 +34,7 @@ def google_auth(data):
         return {
             "message": "Google login verified ✅",
             "user": {
-                "google_id": google_id,
+                "user_id": google_id,
                 "email": email,
                 "name": name,
                 "picture": picture,
