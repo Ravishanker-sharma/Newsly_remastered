@@ -48,11 +48,12 @@ if check_table_existence('user_data') == False:
     id SERIAL PRIMARY KEY,
     name TEXT,
     age INT,
-    user_id TEXT,
+    user_id TEXT UNIQUE NOT NULL,
     email TEXT UNIQUE NOT NULL,
-    password TEXT
+    picture TEXT
     )
     ''')
+    print('Created Table : User data')
 
 def update_news_data():
     try :
@@ -74,24 +75,19 @@ def update_news_data():
     except Exception as e:
         print(e)
 
-def signup(user):
-    print(user)
-    password_hash = bcrypt.hashpw(user['password'].encode('utf-8'), bcrypt.gensalt())
-    password = password_hash.decode('utf-8')
+def signup(user_id,name,email,picture,age):
     try:
         # Step 1: Check if email exists
-        cursor.execute("SELECT * FROM user_data WHERE email = %s LIMIT 1", (user['email'],))
+        cursor.execute("SELECT * FROM user_data WHERE email = %s LIMIT 1", (email,))
         result = cursor.fetchone()
 
         if result:
             print("User exists:", result)
             return result  # Return existing user
 
-        # Step 2: Insert new user if not found
-        user_id = str(uuid.uuid4())
         cursor.execute(
-            "INSERT INTO user_data (name, age, user_id, email,password) VALUES (%s, %s, %s, %s,%s)",
-            (user['name'], user['age'], user_id, user['email'],password)
+            "INSERT INTO user_data (name, age, user_id, email,picture) VALUES (%s, %s, %s, %s,%s)",
+            (name, age, user_id,email,picture)
         )
         conn.commit()
         print("User Added!")
@@ -101,24 +97,14 @@ def signup(user):
         print("Database error:", e)
         return None
 
-def login(user):
-    try:
-        cursor.execute("SELECT password,user_id FROM user_data WHERE email = %s", (user['email'],))
-        result = cursor.fetchone()
-        password = result[0].encode('utf-8')
-        if bcrypt.checkpw(user['password'].encode('utf-8'),password):
-            return result[1]
-        else:
-            return False
-    except Exception as e:
-        print("Database error:", e)
+
 
 def check_user(user):
     try:
-        cursor.execute("SELECT * FROM user_data WHERE email = %s", (user["email"],))
+        cursor.execute("SELECT * FROM user_data WHERE email = %s", (user,))
         result = cursor.fetchone()
         if result:
-            return 1  # User exists
+            return result  # User exists
         else:
             return 0  # No user found
     except Exception as e:

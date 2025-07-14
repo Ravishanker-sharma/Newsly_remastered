@@ -8,7 +8,7 @@ from typing import Optional
 from config import convert_audio_to_text
 import shutil
 from newsly_chat_bot.chat_bot import chat as newsly_chat
-from Database.Sqlbase import Format_news,login,fetch_news_via_id,signup,check_user
+from Database.Sqlbase import Format_news,fetch_news_via_id,signup,check_user
 from Database.vectordatabase import delete_existing,add_data
 from datetime import datetime,timezone
 from Backend.display_personalized_news import for_you_section
@@ -96,25 +96,6 @@ class User(BaseModel):
     age: int
     email: str
     password: str
-
-@app.post("/api/login")
-async def log_user(user: Log):
-    print("Received payload:", user.email,user.password)
-    data = dict()
-    data["email"] = user.email
-    data["password"] = user.password
-    if check_user(data) == 1:
-        print("login results: Loged in !")
-        result = login(data)
-        print("login results:",result)
-        return {"fullName":"Name",
-      "user_id": result
-        }
-    else:
-        print("login results: raised a error!")
-        raise HTTPException(status_code=401,detail="Invalid credentials")
-
-
 
 @app.post("/api/chat/voice")
 async def chat_voice(

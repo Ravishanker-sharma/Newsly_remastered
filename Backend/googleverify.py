@@ -1,5 +1,5 @@
 from fastapi import HTTPException
-from pydantic import BaseModel
+from Database.Sqlbase import signup,check_user
 import os
 from google.oauth2 import id_token
 from google.auth.transport import requests as grequests
@@ -9,6 +9,24 @@ GOOGLE_CLIENT_ID = os.getenv("GOOGLE_CLIENT_ID")
 
 def google_auth(data):
     try:
+        userdata  =  check_user(data.email)
+        if userdata:
+
+            return{
+                "message": "Google login verified ✅",
+                "user": {
+                    "user_id": userdata[3],
+                    "email": userdata[4],
+                    "name": userdata[1],
+                    "picture": userdata[5],
+                    "age": userdata[2]  # optional, came from frontend
+                }
+            }
+
+    except Exception as e:
+        print(e)
+    try:
+
         # ✅ Verify token using Google lib
         idinfo = id_token.verify_oauth2_token(
             data.credential,
@@ -25,7 +43,7 @@ def google_auth(data):
         email = idinfo["email"]
         name = idinfo.get("name", "")
         picture = idinfo.get("picture", "")
-
+        signup(google_id, email, name, picture, data.age)
         # 👉 This is now a trusted user. You can:
         # - Save them to your database
         # - Create a session or token
