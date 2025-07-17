@@ -2,35 +2,21 @@ from config import llm2,extract_json_from_llm_output
 from StoreNews.fetch_news_all_kind import fetch_raw_data
 import threading
 import time
-from langchain.output_parsers import PydanticOutputParser
-from pydantic import BaseModel
-from langchain.prompts import PromptTemplate
 from Database.Sqlbase import update_news_data
 from Database.duplicate import check_for_duplicate
-from typing import List,Dict
 
-
-class Newsitem(BaseModel):
-    image_url : str
-    headline : str
-    Paragraphs : list
-    section : str
-    source : str
-    type : str
-    faq : list
 page = 1  # Will try to implement later
 final_data = []
 lock = threading.Lock()
 
 # Distinguished Raw News Data
-whole_data = fetch_raw_data()
-world_news = whole_data[0]
-sports_news = whole_data[1]
-india_news = whole_data[2]
-education_news = whole_data[3]
-entertainment_news = whole_data[4]
-trending_news = whole_data[5]
-print(whole_data)
+# whole_data = fetch_raw_data()
+world_news = []
+sports_news = []
+india_news = []
+education_news = []
+entertainment_news = []
+trending_news = []
 instruction = """
 You will be provided with News data containing news in format of List[dictionary].
 Each Dictionary item is a different news.
@@ -83,7 +69,7 @@ def runner():
         t.join()
 
 
-def main():
+def ai_news_store():
     global final_data
     runner()
     result = final_data
@@ -100,18 +86,25 @@ def main():
     final_data.clear()
     if world_news or sports_news or india_news or education_news or entertainment_news or trending_news:
         print("~" * 25, "Length", "~" * 25)
-        print(len(world_news))
-        print(len(sports_news))
-        print(len(india_news))
-        print(len(education_news))
-        print(len(entertainment_news))
-        print(len(trending_news))
-        print(len(final_data))
-        print("Found Items in the List, Sleeping for 100 secs.")
-        time.sleep(100)
-        main()
+        # print(len(world_news))
+        # print(len(sports_news))
+        # print(len(india_news))
+        # print(len(education_news))
+        # print(len(entertainment_news))
+        # print(len(trending_news))
+        # print(len(final_data))
+        print("Found Items in the List, Sleeping for 10 secs.")
+        time.sleep(10)
+        ai_news_store()
 
+def main_runner():
+    global world_news,sports_news,india_news,education_news,entertainment_news,trending_news
+    whole_data = fetch_raw_data()
+    world_news = whole_data[0]
+    sports_news = whole_data[1]
+    india_news = whole_data[2]
+    education_news = whole_data[3]
+    entertainment_news = whole_data[4]
+    trending_news = whole_data[5]
+    ai_news_store()
 
-if __name__ == '__main__':
-    main()
-    print(final_data)

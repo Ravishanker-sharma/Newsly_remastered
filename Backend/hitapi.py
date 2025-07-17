@@ -1,5 +1,4 @@
-import asyncio
-
+import uuid
 from fastapi import FastAPI,UploadFile,File,Form,HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -14,7 +13,31 @@ from datetime import datetime,timezone
 from Backend.display_personalized_news import for_you_section
 from Backend.Getdetails import details
 from Backend.googleverify import google_auth
-app = FastAPI()
+from StoreNews.news_store import main_runner
+from test import stream_details
+from fastapi.responses import StreamingResponse
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from contextlib import asynccontextmanager
+import asyncio
+
+scheduler = AsyncIOScheduler()
+scheduler.add_job(lambda :asyncio.create_task(main_runner()),'cron',hour='4,6,8,10,12,14,16,18,20,22,0,1')
+
+
+async def run_news_store():
+    print("Running News Store.")
+    await asyncio.to_thread(main_runner)
+    print("News Store Complete.")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("starting lifespan")
+    scheduler.start()
+    await run_news_store()
+    yield
+    print("Lifespan Complete.")
+    scheduler.shutdown()
+app = FastAPI(lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,7 +47,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
 
 @app.get("/")
 def read_root():
@@ -88,9 +110,6 @@ async def feedback(feedback: FeedbackRequest):
     else:
         return {"status":"failure"}
 
-class Log(BaseModel):
-    email: str
-    password: str
 class User(BaseModel):
     fullName: str
     age: int
@@ -104,7 +123,8 @@ async def chat_voice(
     news_id: Optional[str] = Form(None),
     conversation_id: Optional[str] = Form(None)
 ):
-    file_path = "voice_message.wav"
+
+    file_path = f"{uuid.uuid4()}voice_message.wav"
 
     # Save uploaded file (overwrite if exists)
     with open(file_path, "wb") as buffer:
@@ -141,11 +161,16 @@ async def chat_faqs(newsId:str):
     return JSONResponse(faq_lis)
 
 @app.get("/api/news/detailed")
-async def news_detailed(news_id:str,user_id:str):
-    if user_id.startswith("guest"):
-        return JSONResponse({"message":"Sign in with your Google account to continue."})
-    output = details(news_id)
-    return output
+async def news_detailed(news_id:str,user_id: Optional[str] = None):
+    if not news_id or news_id.strip().lower() == "null":
+        return JSONResponse({"message": "Please enter a valid news id"}, status_code=400)
+
+    return StreamingResponse(stream_details(news_id), media_type="text/plain")
+
+    # if user_id.startswith("guest"):
+    #     return JSONResponse({"message":"Sign in with your Google account to continue."})
+    # output = details(news_id)
+    # return output
 
 @app.post("/api/register")
 async def register(user: User):

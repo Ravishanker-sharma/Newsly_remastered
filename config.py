@@ -25,7 +25,8 @@ llm2 = ChatGoogleGenerativeAI(
 llm3 = ChatGoogleGenerativeAI(
     model="gemini-2.0-flash",
     api_key = api3,
-    temperature=0.7
+    temperature=0.7,
+model_kwargs={"streaming": True}
 )
 def extract_json_from_llm_output(text):
     # Step 1: Remove markdown code fences and extra characters
