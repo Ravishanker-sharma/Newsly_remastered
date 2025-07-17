@@ -14,11 +14,12 @@ from Backend.display_personalized_news import for_you_section
 from Backend.Getdetails import details
 from Backend.googleverify import google_auth
 from StoreNews.news_store import main_runner
-from test import stream_details
+from Backend.detail_streamer import stream_details
 from fastapi.responses import StreamingResponse
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from contextlib import asynccontextmanager
 import asyncio
+from Backend.Search import search
 
 scheduler = AsyncIOScheduler()
 scheduler.add_job(lambda :asyncio.create_task(main_runner()),'cron',hour='4,6,8,10,12,14,16,18,20,22,0,1')
@@ -33,7 +34,7 @@ async def run_news_store():
 async def lifespan(app: FastAPI):
     print("starting lifespan")
     scheduler.start()
-    await run_news_store()
+    # await run_news_store()
     yield
     print("Lifespan Complete.")
     scheduler.shutdown()
@@ -198,3 +199,8 @@ class GoogleAuth(BaseModel):
 async def auth_google(auth: GoogleAuth):
     google_data = google_auth(auth)
     return google_data
+
+@app.get("/api/search")
+async def search_runner(q:str):
+    output = search(q)
+    return output
