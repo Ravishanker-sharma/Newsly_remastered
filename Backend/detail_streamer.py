@@ -2,7 +2,7 @@ import asyncio
 
 from Database.Sqlbase import fetch_news_via_id
 from StoreNews.genralscraper import get_data
-from config import llm3
+from config import llm as llm3
 
 readtimedata = ""
 def details(news_id):
@@ -31,7 +31,7 @@ Raw News:
 async def stream_details(news_id):
     llm_input = details(news_id)
     async for chunk in llm3.astream(llm_input):
-        yield chunk.content
+        yield f"data: {chunk.content}\n\n"
 
 async def stream():
     global readtimedata
