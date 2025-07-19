@@ -17,7 +17,7 @@ Instructions:
 - Do not summarize. Expand all relevant points into a proper narrative structure.
 - Do not include irrelevant or fabricated information (e.g., fake quotes, made-up people like Pope Leo XIV).
 - Avoid repetition and contradiction.
-- Your output must be a **valid Python string object**, enclosed in triple quotes.
+- Output clean and well-structured text in Markdown format.
 
 Raw News:
 \"\"\"{data}\"

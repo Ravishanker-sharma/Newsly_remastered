@@ -149,7 +149,7 @@ def contains_binary_or_corrupt(text: str) -> bool:
     return False
 
 def smart_scrape(url, section=None):
-        print(f"⚠⚠ Running for Url[{url}] || Type : {section} ⚠⚠")
+        # print(f"⚠⚠ Running for Url[{url}] || Type : {section} ⚠⚠")
         info = dict()
         temp_lis_h = []
         temp_lis_p = []
