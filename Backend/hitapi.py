@@ -25,6 +25,15 @@ scheduler = AsyncIOScheduler()
 scheduler.add_job(lambda :asyncio.create_task(main_runner()),'cron',hour='4,6,8,10,12,14,16,18,20,22,0,1')
 
 
+class FeedbackRequest(BaseModel):
+    user_id: str
+    news_id: int
+    feedback: str  # "like" or "dislike"
+
+class FeedbackResponse(BaseModel):
+    status: str
+
+
 async def run_news_store():
     print("Running News Store.")
     await asyncio.to_thread(main_runner)
@@ -83,16 +92,8 @@ async def chat(message:ChatRequest):
     output = newsly_chat(message.message,message.news_id)
     currenttime = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     print(message.user_id)
+    await feedback(FeedbackRequest(user_id=message.user_id,news_id=message.news_id,feedback="like"))
     return ChatResponse(message=str(output),conversation_id='123',timestamp=currenttime)
-
-
-class FeedbackRequest(BaseModel):
-    user_id: str
-    news_id: int
-    feedback: str  # "like" or "dislike"
-
-class FeedbackResponse(BaseModel):
-    status: str
 
 @app.post("/api/feedback",response_model=FeedbackResponse)
 async def feedback(feedback: FeedbackRequest):
