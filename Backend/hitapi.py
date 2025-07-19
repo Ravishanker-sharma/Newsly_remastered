@@ -167,7 +167,7 @@ async def news_detailed(news_id:str,user_id: Optional[str] = None):
     if not news_id or news_id.strip().lower() == "null":
         return JSONResponse({"message": "Please enter a valid news id"}, status_code=400)
 
-    return StreamingResponse(stream_details(news_id), media_type="text/plain")
+    return StreamingResponse(stream_details(news_id), media_type="text/event-stream")
 
     # if user_id.startswith("guest"):
     #     return JSONResponse({"message":"Sign in with your Google account to continue."})
